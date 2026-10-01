@@ -7,8 +7,10 @@ services:
     image: floci/floci:latest
     ports:
       - "4566:4566"
+      - "7001-7099:7001-7099"   # cổng data-plane của RDS
     environment:
       FLOCI_STORAGE_MODE: hybrid   # giữ state khi restart
+      FLOCI_STORAGE_PRUNE_VOLUMES_ON_DELETE: "true"   # terraform destroy dọn luôn volume k3s/RDS
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock   # EKS/ECR/RDS của Floci chạy bằng container
       - floci-data:/app/data
