@@ -1,0 +1,9 @@
+# Chấp nhận có lý do (chỉ áp dụng cho lab chạy trên Floci). Bật lại khi dựng trên AWS/OCI thật.
+#
+# EKS endpoint public: k3s của Floci chỉ truy cập được qua https://localhost:<port>, không có endpoint private.
+# Trên AWS thật: endpoint_private_access = true, endpoint_public_access = false (hoặc public_access_cidrs hẹp).
+AWS-0040
+AWS-0041
+# Mã hóa secret của EKS bằng KMS: Floci không thực thi KMS envelope encryption và thêm encryption_config
+# sẽ buộc recreate cluster (mất ArgoCD). Trên AWS thật: thêm aws_kms_key + encryption_config { resources = ["secrets"] }.
+AWS-0039

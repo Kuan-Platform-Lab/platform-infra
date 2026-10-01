@@ -33,7 +33,7 @@ resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.this.id
   cidr_block              = local.public_cidrs[count.index]
   availability_zone       = var.azs[count.index]
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false # không có gì cần IP public ở đây; LB cấp IP riêng
   tags = {
     Name                     = "${var.name}-public-${var.azs[count.index]}"
     "kubernetes.io/role/elb" = "1"
