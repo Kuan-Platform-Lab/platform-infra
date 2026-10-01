@@ -1,0 +1,49 @@
+# Phase 0: Floci (AWS giả lập) + Postgres + 2 app BE.
+# Giả định các repo được clone cạnh nhau: ../../order-service, ../../payment-service.
+name: platform-lab
+
+services:
+  floci:
+    image: floci/floci:latest
+    ports:
+      - "4566:4566"
+    environment:
+      FLOCI_STORAGE_MODE: hybrid   # giữ state khi restart
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock   # EKS/ECR/RDS của Floci chạy bằng container
+      - floci-data:/app/data
+
+  orders-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: orders
+      POSTGRES_USER: orders
+      POSTGRES_PASSWORD: orders
+    volumes:
+      - orders-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orders"]
+      interval: 5s
+      retries: 10
+
+  payment-service:
+    build: ../../payment-service
+    ports:
+      - "8082:8082"
+      - "8083:8083"
+
+  order-service:
+    build: ../../order-service
+    depends_on:
+      orders-db: { condition: service_healthy }
+      payment-service: { condition: service_started }
+    environment:
+      DB_URL: jdbc:postgresql://orders-db:5432/orders
+      PAYMENT_URL: http://payment-service:8082
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+
+volumes:
+  floci-data:
+  orders-db:
